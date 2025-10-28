@@ -1,73 +1,169 @@
-Cronómetro JW - Instrucciones de Compilación (Linux)
-Esta guía explica cómo compilar el proyecto CronometroJW_2.py desde el código fuente en un sistema operativo Linux.
+<h1 align="center">🐧 Cronómetro JW — Instrucciones de Compilación (Linux)</h1>
 
-Prerrequisitos
-Python 3: Asegúrate de tener Python 3 instalado.
+<p align="center">
+  Guía para compilar el proyecto <strong>CronometroJW_2.py</strong> desde el código fuente en Linux.
+</p>
 
+---
+
+## 🧩 Prerrequisitos
+
+Asegúrate de tener instalado lo siguiente en tu sistema:
+
+### 🐍 Python 3
+Verifica que Python 3 esté instalado:
+
+```bash
 python3 --version
-pip: El gestor de paquetes de Python.
-venv: El módulo de entornos virtuales de Python (generalmente incluido y opcional dependiendo de tu distribuciòn).
+```
 
-Pasos para Compilar
-1. Preparar el Entorno
-Abre una terminal y navega hasta el directorio donde se encuentra el archivo CronometroJW_2.py y el icono CronometroJW.png.
+### 📦 pip
+El gestor de paquetes de Python. Comprueba su instalación con:
 
-Crea un entorno virtual para instalar las dependencias de forma aislada. Esto es una buena práctica y evita conflictos con otros proyectos.
+```bash
+pip --version
+```
 
-Bash:
+### 🌱 venv (opcional)
+El módulo de entornos virtuales(opcional dependiendo de tu distribuciòn) de Python (generalmente incluido por defecto en la distribución).  
+Permite aislar dependencias por proyecto.
+
+---
+
+## ⚙️ Pasos para Compilar
+
+### 1️⃣ Preparar el Entorno
+
+Abre una **terminal** y navega hasta el directorio donde se encuentran los archivos del proyecto:
+
+- `CronometroJW_2.py`
+- `CronometroJW.png` (ícono opcional)
+
+Ejemplo:
+
+```bash
+cd /ruta/a/tu/proyecto
+```
+
+Crea un entorno virtual para instalar las dependencias de forma aislada (recomendado):
+
+```bash
 python3 -m venv venv
+```
 
 Activa el entorno virtual:
-Bash:
+
+```bash
 source venv/bin/activate
-(Notarás que el nombre de tu terminal cambia, indicando que el entorno venv está activo).
+```
 
-2. Instalar Dependencias
-El proyecto requiere la biblioteca sv-ttk para el estilo visual. Instálala con pip:
+> 💡 Notarás que el nombre de tu terminal cambia, indicando que el entorno `venv` está activo.
 
-Bash:
+---
+
+### 2️⃣ Instalar Dependencias
+
+Instala las bibliotecas necesarias con `pip`:
+
+```bash
 pip install sv-ttk
-
-Necesitarás PyInstaller para convertir el script en un ejecutable. Instálalo también:
-
-Bash:
 pip install pyinstaller
+```
 
-3. Compilar el Ejecutable
-Estando en la misma carpeta (y con el entorno venv activado), ejecuta el siguiente comando para crear el ejecutable.
-Este comando empaquetará todo en un solo archivo (--onefile) y le asignará el icono (--icon) que se encuentra en esta misma carpeta.
+- [`sv-ttk`](https://pypi.org/project/sv-ttk/) — Proporciona un estilo visual moderno a la interfaz.
+- [`PyInstaller`](https://pyinstaller.org/) — Convierte el script de Python en un ejecutable independiente.
 
-Bash:
+---
+
+### 3️⃣ Compilar el Ejecutable
+
+Con el entorno virtual activo y en la misma carpeta del proyecto, ejecuta:
+
+```bash
 pyinstaller --onefile --icon="CronometroJW.png" CronometroJW_2.py
-PyInstaller trabajará por unos momentos y creará varias carpetas. Tu aplicación final se encontrará dentro de la carpeta dist.
+```
 
-Ejecutar la Aplicación
-Una vez compilado, tienes dos formas principales de ejecutar tu cronómetro:
+> ⚙️ Este comando empaqueta todo en un solo archivo (`--onefile`) y le asigna el ícono especificado (`--icon`).  
+> PyInstaller creará una carpeta `dist/` que contendrá el ejecutable final.
 
-Opción A: Ejecución Directa
-Navega a la carpeta dist que se acaba de crear:
+---
 
-Bash:
+## 🚀 Ejecutar la Aplicación
+
+### 🅰️ Opción A — Ejecución Directa
+
+Navega a la carpeta `dist` generada por PyInstaller:
+
+```bash
 cd dist
-Puedes hacer doble clic sobre el archivo CronometroJW_2 (que no tendrá extensión) desde tu explorador de archivos para abrirlo.
+```
 
-O bien, ejecutarlo desde la terminal:
+Ejecuta el programa directamente desde la terminal:
 
-Bash:
+```bash
 ./CronometroJW_2
-Opción B: (Avanzado) Instalar como Comando del Sistema
-Si deseas poder abrir tu aplicación desde cualquier terminal o añadirla a tu menú de aplicaciones (como neofetch), sigue estos pasos:
+```
 
-Mueve el ejecutable a tu carpeta local de binarios:
+O haz doble clic sobre el archivo `CronometroJW_2` (sin extensión) desde tu explorador de archivos.
 
-Bash:
-(Asegúrate de que la carpeta exista primero)
+---
+
+### 🅱️ Opción B — Instalar como Comando del Sistema (Avanzado)
+
+Si deseas ejecutar el cronómetro desde cualquier ubicación o añadirlo a tu menú de aplicaciones:
+
+1. Asegúrate de que exista la carpeta local de binarios:
+
+```bash
 mkdir -p ~/.local/bin
+```
 
-(Mueve el ejecutable desde la carpeta dist)
+2. Mueve el ejecutable desde `dist` a esa carpeta:
+
+```bash
 mv dist/CronometroJW_2 ~/.local/bin/
-Cierra y vuelve a abrir tu terminal. Ahora deberías poder ejecutar la aplicación simplemente escribiendo:
+```
 
-Bash:
+3. Cierra y vuelve a abrir la terminal.  
+   Ahora podrás ejecutar la aplicación escribiendo simplemente:
+
+```bash
 CronometroJW_2
-Para el icono del menú: Para que aparezca en tu menú de aplicaciones (Gnome, KDE, etc.) con su icono, necesitarás crear un archivo .desktop en la carpeta ~/.local/share/applications/.
+```
+
+---
+
+### 🎨 (Opcional) Añadir al Menú de Aplicaciones
+
+Para que aparezca en tu menú (Gnome, KDE, etc.) con su ícono, crea un archivo `.desktop` en:
+
+```
+~/.local/share/applications/
+```
+
+Ejemplo de contenido del archivo `cronometrojw.desktop`:
+
+```ini
+[Desktop Entry]
+Name=Cronómetro JW
+Exec=/home/tu_usuario/.local/bin/CronometroJW_2
+Icon=/ruta/a/tu/proyecto/CronometroJW.png
+Type=Application
+Categories=Utility;
+Terminal=false
+```
+
+Guarda el archivo y dale permisos de ejecución:
+
+```bash
+chmod +x ~/.local/share/applications/cronometrojw.desktop
+```
+
+---
+
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10+-blue?logo=python" alt="Python Badge">
+  <img src="https://img.shields.io/badge/License-NonCommercial-green" alt="License Badge">
+  <img src="https://img.shields.io/badge/Status-Active-success" alt="Status Badge">
+</p>

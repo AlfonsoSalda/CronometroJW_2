@@ -3,18 +3,23 @@ from tkinter import ttk
 from tkinter import font
 from tkinter import messagebox
 import re 
+import time # <--- IMPORTADO
 
 class CronometroAvanzado:
     def __init__(self, root):
         self.root = root
         self.root.title("Cronómetro para Discursos v2")
         self.root.geometry("700x700") 
-        self.root.minsize(400, 500)  
+        self.root.minsize(400, 500) 
 
         # --- Estado del cronómetro ---
         self.running = False
-        self.elapsed_ms = 0   
-        self.target_ms = 0  
+        self.elapsed_ms = 0 
+        self.target_ms = 0 
+
+        # --- Variables de tiempo preciso ---
+        self.anchor_time = 0.0
+        self.start_elapsed_ms = 0.0
 
         # --- Variables de Tkinter ---
         self.time_str = tk.StringVar(value="00:00.0")
@@ -26,11 +31,11 @@ class CronometroAvanzado:
         try:
             # Intenta usar fuentes más modernas (estilo Win 11)
             self.default_font = font.Font(family="Segoe UI", size=10)
-            timer_font_family = "Segoe UI Semibold"
+            timer_font_family = "Consolas"
         except tk.TclError:
             # Fallback para otros sistemas
             self.default_font = font.Font(family="Helvetica", size=10)
-            timer_font_family = "Helvetica"
+            timer_font_family = "Courier New"
             
         self.timer_font = font.Font(family=timer_font_family, size=48, weight="bold")
         self.second_timer_font = font.Font(family=timer_font_family, size=60, weight="bold")
@@ -214,11 +219,11 @@ class CronometroAvanzado:
                 minutos = int(tiempo)
                 tiempo = f"{minutos:02d}:00"
             except ValueError:
-                 messagebox.showerror(
+                messagebox.showerror(
                     "Error de Formato", 
                     "Formato de tiempo inválido. Use mm:ss o hh:mm:ss (o solo minutos)."
                 )
-                 return
+                return
 
         if discurso:
             self.tree.insert('', tk.END, values=(discurso, tiempo))
@@ -275,19 +280,35 @@ class CronometroAvanzado:
                 )
                 return
 
+            # --- CAMBIO DE PRECISIÓN ---
+            # Guarda el tiempo actual del sistema como ancla
+            self.anchor_time = time.monotonic() 
+            # Guarda el tiempo que ya había transcurrido (0 si es nuevo, >0 si es 'Continuar')
+            self.start_elapsed_ms = self.elapsed_ms
+            # --- FIN DE CAMBIO ---
+
             self.running = True
             
             self.update_timer()
             
     def stop_reset(self):
         if self.running:
-            # Modo Pausa
+            # Modo Pausa (Detener)
             self.running = False
-            self.start_button.config(text="Continuar") # Cambia el texto del botón
+            # Al pausar, self.elapsed_ms retiene el último valor calculado,
+            # lo cual es perfecto para cuando pulsemos 'Continuar'.
+            self.start_button.config(text="Continuar") 
         else:
             # Modo Reset
             self.running = False
             self.elapsed_ms = 0
+            
+            # --- CAMBIO DE PRECISIÓN ---
+            # Resetea también las variables de tiempo preciso
+            self.start_elapsed_ms = 0
+            self.anchor_time = 0.0
+            # --- FIN DE CAMBIO ---
+            
             self.start_button.config(text="Empezar") # Restaura el botón
             self.update_display()
             
@@ -300,14 +321,19 @@ class CronometroAvanzado:
                     self.tree.focus(next_id)
                 else:
                     # Si no hay siguiente, resetea el tiempo del actual
-                     self.on_discourse_select(None)
+                    self.on_discourse_select(None)
             except IndexError:
                 pass 
 
     def update_timer(self):
         if self.running:
-            self.elapsed_ms += 100
+            # --- CÁLCULO DE TIEMPO PRECISO ---
+            # Calcula el tiempo (en ms) que ha pasado desde que se hizo clic en 'start'
+            current_run_ms = (time.monotonic() - self.anchor_time) * 1000
+            # El tiempo total es el tiempo de sesiones pasadas + el de esta sesión
+            self.elapsed_ms = self.start_elapsed_ms + current_run_ms
             
+            # --- Lógica de parada (la misma que tenías) ---
             if (self.mode_var.get() == "descendente" and 
                 not self.color_var.get() and
                 self.elapsed_ms >= self.target_ms):
@@ -319,7 +345,10 @@ class CronometroAvanzado:
             self.update_display()
             
             if self.running:
-                self.root.after(100, self.update_timer)
+                # --- CAMBIO SUTIL ---
+                # Pedimos la actualización más rápido (50ms) para que sea más fluida.
+                # La PRECISIÓN ya no depende de este número.
+                self.root.after(50, self.update_timer)
 
     def update_display(self):
         """Formatea el tiempo basado en el modo (ascendente/descendente)."""
@@ -341,12 +370,14 @@ class CronometroAvanzado:
                 is_negative = True
             else:
                 display_ms = remaining_ms
+
+        display_ms_int = int(display_ms)
         
-        total_seconds = display_ms // 1000
+        total_seconds = display_ms_int // 1000
         hours = total_seconds // 3600
         minutes = (total_seconds % 3600) // 60
         seconds = total_seconds % 60
-        tenths = (display_ms % 1000) // 100
+        tenths = (display_ms_int % 1000) // 100
         
         prefix = "-" if is_negative else ""
         
